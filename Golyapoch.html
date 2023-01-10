@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gol ya poch</title>
+    <style>
+        .contain{
+            display: flex;
+        }
+        .cupslot{
+            width: 105px;
+            height: 150px;
+            margin: 0 25px;
+            position: relative;
+            transition: left 0.5s ease 0s , right 0.5s ease 0s;
+            left: 0;
+        }
+        .cup{
+            width: 105px;
+            height: 150px;
+            background-image: url("http://www.clker.com/cliparts/8/m/s/0/t/K/blue-cup.svg");
+            background-size: 300%;
+            background-repeat: no-repeat;
+            background-position: 44% 50%;
+            position: relative;
+            z-index: 100;
+            transition: margin-top 1s ease 0s;
+            margin-top: 0;
+        }
+        .ball{
+            width: 50px;
+            height: 50px;
+            background-image: url("https://www.pngall.com/wp-content/uploads/5/Red-Ball-PNG.png");
+            background-size: contain;
+            background-repeat: no-repeat;
+            position: absolute;
+            left:28px;
+            bottom:0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+<div class="contain">
+    <div class="cupslot" style="left: 0">
+        <div class="cup">
+
+        </div>
+    </div>
+    <div class="cupslot" style="left: 0">
+        <div class="cup">
+
+        </div>
+    </div>
+    <div class="cupslot" style="left: 0">
+        <div class="cup">
+
+        </div>
+    </div>
+</div>
+<button id="start" onclick="clearballs();startgame()">Start</button>
+<p>Select Difficulty:</p>
+<label for="easy">Easy</label><input id="easy" type="radio" name="diff" data-steps="10" checked>
+<label for="normal">Normal</label><input id="normal" type="radio" name="diff" data-steps="20">
+<label for="hard">Hard</label><input id="hard" type="radio" name="diff" data-steps="30">
+</body>
+<script>
+const cup1 = document.querySelectorAll(".cupslot")[0]
+const cup2 = document.querySelectorAll(".cupslot")[1]
+const cup3 = document.querySelectorAll(".cupslot")[2]
+let cups = [cup1,cup2,cup3]
+const start = document.querySelector("#start")
+const replaceCups = (cupA,cupB) =>{
+    let Ax = cupA.offsetLeft
+    //console.log(Ax)
+    let Bx = cupB.offsetLeft
+    //console.log(Bx)
+    cupA.style.left = `${parseInt(cupA.style.left) + (Bx-Ax)}px`
+    cupB.style.left = `${parseInt(cupB.style.left) + (Ax-Bx)}px`
+}
+const clearballs = () =>{
+    cups.forEach((element)=>{
+        if(element.childElementCount>1){
+            element.removeChild(element.childNodes[3])
+        }
+    })
+}
+const revealCup = (e) =>{
+    let cup = e.target
+    setTimeout(()=>{
+        cup.style.marginTop = "-70px"
+    },0)
+    setTimeout(()=>{
+        cup.style.marginTop = "0"
+        cups.forEach((slot)=>{
+            slot.querySelector(".cup").removeEventListener("click",revealCup)
+        })
+        start.disabled = false
+    },1500)
+}
+const startgame = () =>{
+    start.disabled = true
+    let answer = Math.floor(Math.random()*3)
+    cups[answer].innerHTML += "<div class='ball'></div>"//this caused timing issues for transitions
+    let answercup = cups[answer].querySelector(".cup")
+    setTimeout(()=>{//resolving timing issues of adding innerhtml
+        answercup.style.marginTop = "-70px"
+    },1)
+    setTimeout(()=>{
+        answercup.style.marginTop = "0"
+    },1500)
+    setTimeout(()=>{
+        let i=0
+        let looper = setInterval(()=> {
+            i++
+            let cupA = cups[Math.floor(Math.random() * 3)]
+            let cupB = cups[Math.floor(Math.random() * 3)]
+            while (cupB === cupA) {
+                cupB = cups[Math.floor(Math.random() * 3)]
+            }
+            replaceCups(cupA, cupB)
+            if(i>=document.querySelector("input[name=diff]:checked").getAttribute("data-steps")){
+                clearInterval(looper)
+                cups.forEach((slot)=>{
+                    slot.querySelector(".cup").addEventListener("click",revealCup)
+                })
+            }
+        },500)
+    },2000)
+
+}
+</script>
+</html>
